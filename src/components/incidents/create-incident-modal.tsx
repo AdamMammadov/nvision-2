@@ -6,14 +6,32 @@ import { useState } from "react";
 
 import { Plus } from "lucide-react";
 
+import { useIncidentsStore } from "@/store/use-incidents-store";
+
 export default function CreateIncidentModal() {
   const [title, setTitle] = useState("");
 
   const [location, setLocation] =
     useState("");
 
+  const [severity, setSeverity] =
+    useState<
+      "high" | "medium" | "low"
+    >("high");
+
+  const [open, setOpen] =
+    useState(false);
+
+  const addIncident =
+    useIncidentsStore(
+      (state) => state.addIncident
+    );
+
   return (
-    <Dialog.Root>
+    <Dialog.Root
+      open={open}
+      onOpenChange={setOpen}
+    >
       <Dialog.Trigger asChild>
         <button
           className="
@@ -128,7 +146,83 @@ export default function CreateIncidentModal() {
               />
             </div>
 
+            <div>
+              <label className="mb-2 block text-sm text-slate-400">
+                Severity
+              </label>
+
+              <select
+                value={severity}
+                onChange={(e) =>
+                  setSeverity(
+                    e.target.value as
+                      | "high"
+                      | "medium"
+                      | "low"
+                  )
+                }
+                className="
+                  w-full
+                  rounded-xl
+                  border
+                  border-slate-700
+                  bg-slate-900
+                  px-4
+                  py-3
+                  outline-none
+                  focus:border-cyan-500
+                "
+              >
+                <option value="high">
+                  High Risk
+                </option>
+
+                <option value="medium">
+                  Medium Risk
+                </option>
+
+                <option value="low">
+                  Low Risk
+                </option>
+              </select>
+            </div>
+
             <button
+              onClick={() => {
+                if (!title || !location)
+                  return;
+
+                addIncident({
+                  id: Date.now(),
+
+                  title,
+
+                  location,
+
+                  status:
+                    severity === "high"
+                      ? "critical"
+                      : severity ===
+                        "medium"
+                      ? "in_progress"
+                      : "resolved",
+
+                  severity,
+
+                  assignedTo:
+                    "Dispatcher Team",
+
+                  createdAt: "Just now",
+                });
+
+                setTitle("");
+
+                setLocation("");
+
+                setSeverity("high");
+
+                setOpen(false);
+              }}
               className="
                 mt-4
                 w-full

@@ -9,7 +9,7 @@ import {
 
 import L from "leaflet";
 
-import { incidents } from "@/lib/mock/incidents";
+import { useIncidentsStore } from "@/store/use-incidents-store";
 
 const customIcon = (color: string) =>
   new L.DivIcon({
@@ -30,12 +30,36 @@ const customIcon = (color: string) =>
 
 const coordinates: [number, number][] = [
   [40.4093, 49.8671],
+
   [40.4121, 49.8512],
+
   [40.4045, 49.8701],
+
   [40.4183, 49.8622],
+
+  [40.4062, 49.8544],
+
+  [40.4144, 49.8655],
+
+  [40.4012, 49.8731],
+
+  [40.4201, 49.8581],
+
+  [40.4164, 49.8474],
+
+  [40.4082, 49.8791],
+
+  [40.3991, 49.8612],
+
+  [40.4222, 49.8699],
 ];
 
 export default function MapComponent() {
+  const incidents =
+    useIncidentsStore(
+      (state) => state.incidents
+    );
+
   return (
     <MapContainer
       center={[40.4093, 49.8671]}
@@ -48,35 +72,102 @@ export default function MapComponent() {
 
       {incidents.map((incident, index) => {
         const color =
-          incident.status === "critical"
+          incident.severity === "high"
             ? "#ef4444"
-            : incident.status === "resolved"
-            ? "#10b981"
-            : incident.status === "in_progress"
+            : incident.severity ===
+              "medium"
             ? "#eab308"
-            : "#64748b";
+            : "#10b981";
+
+        const position =
+          coordinates[
+            index %
+              coordinates.length
+          ];
 
         return (
           <Marker
             key={incident.id}
-            position={coordinates[index]}
+            position={position}
             icon={customIcon(color)}
           >
             <Popup>
-              <div className="space-y-2">
-                <h2 className="font-bold">
-                  {incident.title}
-                </h2>
+              <div className="space-y-3 min-w-[220px]">
+                <div>
+                  <h2 className="text-lg font-bold">
+                    {incident.title}
+                  </h2>
 
-                <p>{incident.location}</p>
+                  <p className="text-sm text-slate-500">
+                    {incident.location}
+                  </p>
+                </div>
 
-                <p>
-                  Status: {incident.status}
-                </p>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`
+                      rounded-full
+                      px-3
+                      py-1
+                      text-xs
+                      ${
+                        incident.severity ===
+                        "high"
+                          ? "bg-red-500/20 text-red-400"
 
-                <p>
-                  Assigned: {incident.assignedTo}
-                </p>
+                          : incident.severity ===
+                            "medium"
+                          ? "bg-yellow-500/20 text-yellow-400"
+
+                          : "bg-emerald-500/20 text-emerald-400"
+                      }
+                    `}
+                  >
+                    {incident.severity} risk
+                  </div>
+
+                  <div
+                    className={`
+                      rounded-full
+                      px-3
+                      py-1
+                      text-xs
+                      ${
+                        incident.status ===
+                        "critical"
+                          ? "bg-red-500/20 text-red-400"
+
+                          : incident.status ===
+                            "in_progress"
+                          ? "bg-yellow-500/20 text-yellow-400"
+
+                          : "bg-emerald-500/20 text-emerald-400"
+                      }
+                    `}
+                  >
+                    {incident.status}
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-sm">
+                  <p>
+                    <span className="font-semibold">
+                      Assigned:
+                    </span>{" "}
+                    {
+                      incident.assignedTo
+                    }
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Time:
+                    </span>{" "}
+                    {
+                      incident.createdAt
+                    }
+                  </p>
+                </div>
               </div>
             </Popup>
           </Marker>
