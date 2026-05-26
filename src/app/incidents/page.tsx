@@ -1,17 +1,5 @@
-"use client";
-
-import dynamic from "next/dynamic";
 import DashboardLayout from "@/components/layout/dashboard-layout";
-
-// LiveMap komponentini SSR söndürülmüş şəkildə dinamik yükləyirik
-const LiveMap = dynamic(() => import("@/components/map/live-map"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-[400px] w-full flex items-center justify-center bg-slate-100 rounded-lg animate-pulse">
-      <p className="text-slate-500">Xəritə yüklənir...</p>
-    </div>
-  ),
-});
+import LiveMap from "@/components/map/live-map";
 
 export default function IncidentsPage() {
   return (
