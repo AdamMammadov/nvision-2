@@ -7,12 +7,17 @@ import {
   Popup,
 } from "react-leaflet";
 
-import L from "leaflet";
-
 import { useIncidentsStore } from "@/store/use-incidents-store";
 
-const customIcon = (color: string) =>
-  new L.DivIcon({
+const L =
+  typeof window !== "undefined"
+    ? require("leaflet")
+    : null;
+
+const customIcon = (color: string) => {
+  if (!L) return undefined;
+
+  return new L.DivIcon({
     className: "",
     html: `
       <div
@@ -27,6 +32,7 @@ const customIcon = (color: string) =>
       ></div>
     `,
   });
+};
 
 const coordinates: [number, number][] = [
   [40.4093, 49.8671],
@@ -92,7 +98,7 @@ export default function MapComponent() {
             icon={customIcon(color)}
           >
             <Popup>
-              <div className="space-y-3 min-w-[220px]">
+              <div className="min-w-[220px] space-y-3">
                 <div>
                   <h2 className="text-lg font-bold">
                     {incident.title}
@@ -114,11 +120,9 @@ export default function MapComponent() {
                         incident.severity ===
                         "high"
                           ? "bg-red-500/20 text-red-400"
-
                           : incident.severity ===
                             "medium"
                           ? "bg-yellow-500/20 text-yellow-400"
-
                           : "bg-emerald-500/20 text-emerald-400"
                       }
                     `}
@@ -136,11 +140,9 @@ export default function MapComponent() {
                         incident.status ===
                         "critical"
                           ? "bg-red-500/20 text-red-400"
-
                           : incident.status ===
                             "in_progress"
                           ? "bg-yellow-500/20 text-yellow-400"
-
                           : "bg-emerald-500/20 text-emerald-400"
                       }
                     `}
