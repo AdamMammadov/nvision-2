@@ -20,7 +20,7 @@ type IncidentStore = {
     status: Incident["status"]
   ) => void;
 
-  generateRandomIncident: () => void;
+  generateRandomIncident: () => Promise<void>;
 
   fetchIncidents: () => Promise<void>;
 
@@ -215,52 +215,46 @@ export const useIncidentsStore =
           },
 
         generateRandomIncident:
-          () =>
-            set((state) => {
-              const random =
-                randomIncidents[
-                  Math.floor(
-                    Math.random() *
-                      randomIncidents.length
-                  )
-                ];
+          async () => {
+            const random =
+              randomIncidents[
+                Math.floor(
+                  Math.random() *
+                    randomIncidents.length
+                )
+              ];
 
-              const newIncident =
-                {
-                  id: Date.now(),
+            const newIncident =
+              {
+                title:
+                  random.title,
 
-                  title:
-                    random.title,
+                location:
+                  random.location,
 
-                  location:
-                    random.location,
+                assignedTo:
+                  random.assignedTo,
 
-                  assignedTo:
-                    random.assignedTo,
+                severity:
+                  random.severity as
+                    | "high"
+                    | "medium"
+                    | "low",
 
-                  severity:
-                    random.severity as
-                      | "high"
-                      | "medium"
-                      | "low",
+                status:
+                  random.status as
+                    | "critical"
+                    | "in_progress"
+                    | "resolved",
 
-                  status:
-                    random.status as
-                      | "critical"
-                      | "in_progress"
-                      | "resolved",
-
-                  createdAt:
-                    "LIVE",
-                };
-
-              return {
-                incidents: [
-                  newIncident,
-                  ...state.incidents,
-                ],
+                createdAt:
+                  "LIVE",
               };
-            }),
+
+            await get().createIncident(
+              newIncident
+            );
+          },
       };
     }
   );
