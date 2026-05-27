@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import {
   MapContainer,
   TileLayer,
@@ -11,9 +9,9 @@ import {
 
 import "leaflet/dist/leaflet.css";
 
-import { useIncidentsStore } from "@/store/use-incidents-store";
+import { useEffect, useState } from "react";
 
-type LeafletType = typeof import("leaflet");
+import { useIncidentsStore } from "@/store/use-incidents-store";
 
 const coordinates: [number, number][] = [
   [40.4093, 49.8671],
@@ -36,28 +34,32 @@ export default function MapComponent() {
       (state) => state.incidents
     );
 
-  const [L, setL] =
-    useState<LeafletType | null>(
-      null
-    );
+  const [L, setL] = useState<any>(null);
 
   useEffect(() => {
-    import("leaflet").then(setL);
+    import("leaflet").then((leaflet) => {
+      setL(leaflet);
+    });
   }, []);
 
   if (!L) {
     return (
-      <div className="flex h-[600px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-900">
-        <p className="text-slate-400">
-          Loading map...
-        </p>
+      <div
+        className="
+          flex
+          h-[600px]
+          items-center
+          justify-center
+          bg-slate-950
+          text-slate-400
+        "
+      >
+        Loading map...
       </div>
     );
   }
 
-  const customIcon = (
-    color: string
-  ) =>
+  const customIcon = (color: string) =>
     new L.DivIcon({
       className: "",
       html: `
@@ -78,125 +80,107 @@ export default function MapComponent() {
     <MapContainer
       center={[40.4093, 49.8671]}
       zoom={14}
-      className="z-0 h-[600px] w-full"
+      className="h-[600px] w-full z-0"
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {incidents.map(
-        (incident, index) => {
-          const color =
-            incident.severity ===
-            "high"
-              ? "#ef4444"
-              : incident.severity ===
-                "medium"
-              ? "#eab308"
-              : "#10b981";
+      {incidents.map((incident, index) => {
+        const color =
+          incident.severity === "high"
+            ? "#ef4444"
+            : incident.severity ===
+              "medium"
+            ? "#eab308"
+            : "#10b981";
 
-          const position =
-            coordinates[
-              index %
-                coordinates.length
-            ];
+        const position =
+          coordinates[
+            index %
+              coordinates.length
+          ];
 
-          return (
-            <Marker
-              key={incident.id}
-              position={position}
-              icon={customIcon(
-                color
-              )}
-            >
-              <Popup>
-                <div className="min-w-[220px] space-y-3">
-                  <div>
-                    <h2 className="text-lg font-bold">
-                      {
-                        incident.title
+        return (
+          <Marker
+            key={incident.id}
+            position={position}
+            icon={customIcon(color)}
+          >
+            <Popup>
+              <div className="space-y-3 min-w-[220px]">
+                <div>
+                  <h2 className="text-lg font-bold">
+                    {incident.title}
+                  </h2>
+
+                  <p className="text-sm text-slate-500">
+                    {incident.location}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`
+                      rounded-full
+                      px-3
+                      py-1
+                      text-xs
+                      ${
+                        incident.severity ===
+                        "high"
+                          ? "bg-red-500/20 text-red-400"
+                          : incident.severity ===
+                            "medium"
+                          ? "bg-yellow-500/20 text-yellow-400"
+                          : "bg-emerald-500/20 text-emerald-400"
                       }
-                    </h2>
-
-                    <p className="text-sm text-slate-500">
-                      {
-                        incident.location
-                      }
-                    </p>
+                    `}
+                  >
+                    {incident.severity} risk
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`
-                        rounded-full
-                        px-3
-                        py-1
-                        text-xs
-                        ${
-                          incident.severity ===
-                          "high"
-                            ? "bg-red-500/20 text-red-400"
-                            : incident.severity ===
-                              "medium"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-emerald-500/20 text-emerald-400"
-                        }
-                      `}
-                    >
-                      {
-                        incident.severity
-                      }{" "}
-                      risk
-                    </div>
-
-                    <div
-                      className={`
-                        rounded-full
-                        px-3
-                        py-1
-                        text-xs
-                        ${
-                          incident.status ===
-                          "critical"
-                            ? "bg-red-500/20 text-red-400"
-                            : incident.status ===
-                              "in_progress"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-emerald-500/20 text-emerald-400"
-                        }
-                      `}
-                    >
-                      {
-                        incident.status
+                  <div
+                    className={`
+                      rounded-full
+                      px-3
+                      py-1
+                      text-xs
+                      ${
+                        incident.status ===
+                        "critical"
+                          ? "bg-red-500/20 text-red-400"
+                          : incident.status ===
+                            "in_progress"
+                          ? "bg-yellow-500/20 text-yellow-400"
+                          : "bg-emerald-500/20 text-emerald-400"
                       }
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-sm">
-                    <p>
-                      <span className="font-semibold">
-                        Assigned:
-                      </span>{" "}
-                      {
-                        incident.assignedTo
-                      }
-                    </p>
-
-                    <p>
-                      <span className="font-semibold">
-                        Time:
-                      </span>{" "}
-                      {
-                        incident.createdAt
-                      }
-                    </p>
+                    `}
+                  >
+                    {incident.status}
                   </div>
                 </div>
-              </Popup>
-            </Marker>
-          );
-        }
-      )}
+
+                <div className="space-y-1 text-sm">
+                  <p>
+                    <span className="font-semibold">
+                      Assigned:
+                    </span>{" "}
+                    {incident.assignedTo}
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">
+                      Time:
+                    </span>{" "}
+                    {incident.createdAt}
+                  </p>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }
